@@ -1,6 +1,7 @@
 const app = require("express")
 const { userAuth } = require("../middlewares/auth");
 const connectionRequests = require("../models/connectionRequests");
+const user = require("../models/user");
 
 const userRouter = app.Router()
 
@@ -64,9 +65,48 @@ userRouter.get("/user/connections", userAuth, async (req, res)=>
     catch(err)
     {
 
-    }
+    }    
+});
 
-    
+userRouter.get("/feed", userAuth, async (req, res) =>
+{
+    try
+    {
+        const loggedInUser = req.user;
+
+        const alreayInteracted = await connectionRequests.find(
+           {
+            $or: [
+                {fromUserId: loggedInUser._id},
+                {toUserId: loggedInUser._id}
+            ]
+           }
+        ).select("fromUserId toUserId")
+
+        const hideUsers = new Set();
+
+        alreayInteracted.forEach((item)=>
+        {
+            hideUsers.add(item.fromUserId.toString())
+            hideUsers.add(item.toUserId.toString())
+        })
+
+        const usersToShow = await user.find({
+            $and: [
+                {_id : {$nin : Array.from(hideUsers)}},
+                {_id : {$ne : loggedInUser._id}}
+            ]
+        }).select("firstName lastName age gender skills")
+
+        res.json({
+            message: "List fetched",
+            usersToShow
+        })
+    }
+    catch(err)
+    {
+
+    }
 })
 
 
