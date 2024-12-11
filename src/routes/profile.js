@@ -20,10 +20,6 @@ profileRouter.get("/profile/view",userAuth, async (req, res)=>{
     }
 })
 
-profileRouter.get("/feed",userAuth, async (req,res)=>{
-    const users = await User.find({})
-    res.send(users);
-})
 
 profileRouter.patch("/profile/edit", userAuth, async (req, res)=>{
     try{
