@@ -74,6 +74,12 @@ userRouter.get("/feed", userAuth, async (req, res) =>
     {
         const loggedInUser = req.user;
 
+        let limit = req.query.limit || 10;
+        limit = limit > 50 ? 50 : limit;
+        const page = req.query.page || 1;
+        const skip = (page - 1) * limit;
+
+
         const alreayInteracted = await connectionRequests.find(
            {
             $or: [
@@ -96,7 +102,7 @@ userRouter.get("/feed", userAuth, async (req, res) =>
                 {_id : {$nin : Array.from(hideUsers)}},
                 {_id : {$ne : loggedInUser._id}}
             ]
-        }).select("firstName lastName age gender skills")
+        }).select("firstName lastName age gender skills").skip(skip).limit(limit)
 
         res.json({
             message: "List fetched",
