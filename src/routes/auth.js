@@ -28,8 +28,17 @@ authRouter.post("/signup", async (req, res)=>
         }); // This creates a new instance(document) of the User model
         
         await user.save();//This will push the data to database
+
+        const token = await user.getJWT();  // Creating a token
+
+            //Sending the token to the user
+
+        res.cookie("token", token)
         
-        res.send("User Saved Successfully");
+        res.json({
+            message: "User Signed Up Successfully",
+            user
+        });
         }
         catch(err)
         {
@@ -64,7 +73,7 @@ authRouter.post("/login", async (req, res)=>{
             //Sending the token to the user
 
             res.cookie("token", token)
-            res.send("User login successffulll")
+            res.send(user)
         }
         else
         {
